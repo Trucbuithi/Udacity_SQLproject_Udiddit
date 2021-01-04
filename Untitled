@@ -1,0 +1,281 @@
+  -- Do everything in a transaction
+  BEGIN;
+
+
+  -- Remove all users from New York and California
+  DELETE FROM "user_data" WHERE "state" IN ('NY', 'CA');
+
+
+  -- Split the name column in first_name and last_name
+  ALTER TABLE "user_data"
+  ADD COLUMN "first_name" VARCHAR,
+  ADD COLUMN "last_name" VARCHAR;
+
+  UPDATE "user_data" SET
+  "first_name" = SPLIT_PART("name", ' ', 1),
+  "last_name" = SPLIT_PART("name", ' ', 2);
+
+  ALTER TABLE "user_data" DROP COLUMN "name";
+
+
+  -- Change from state to state_id
+  CREATE TABLE "states" (
+  "id" SMALLSERIAL,
+  "state" CHAR(2)
+  );
+
+  INSERT INTO "states" ("state")
+  SELECT DISTINCT "state" FROM "user_data";
+
+  ALTER TABLE "user_data" ADD COLUMN "state_id" SMALLINT;
+
+  UPDATE "user_data" SET "state_id" = (
+  SELECT "s"."id"
+  FROM "states" "s"
+  WHERE "s"."state" = "user_data"."state"
+  );
+
+  ALTER TABLE "user_data" DROP COLUMN "state";
+
+
+
+
+
+
+
+
+
+
+
+  -- Primary and unique keys
+ALTER TABLE "users"
+  ADD PRIMARY KEY ("id"),
+  ADD UNIQUE ("username"),
+  ADD UNIQUE ("email");
+
+ALTER TABLE "books"
+  ADD PRIMARY KEY ("id"),
+  ADD UNIQUE ("isbn");
+
+ALTER TABLE "user_book_preferences"
+  ADD PRIMARY KEY ("user_id", "book_id");
+
+
+-- Foreign keys
+ALTER TABLE "user_book_preferences"
+  ADD FOREIGN KEY ("user_id") REFERENCES "users",
+  ADD FOREIGN KEY ("book_id") REFERENCES "books";
+
+
+-- Usernames need to have a minimum of 5 characters
+ALTER TABLE "users" ADD CHECK (LENGTH("username") >= 5);
+
+
+-- A book's name cannot be empty
+ALTER TABLE "books" ADD CHECK(LENGTH(TRIM("name")) > 0);
+
+
+-- A book's name must start with a capital letter
+ALTER TABLE "books" ADD CHECK (
+  SUBSTR("name", 1, 1) = UPPER(SUBSTR("name", 1, 1))
+);
+
+
+-- A user's book preferences have to be distinct
+ALTER TABLE "user_book_preferences" ADD UNIQUE ("user_id", "preference");
+
+
+
+
+
+
+
+
+CREATE TABLE "customers" (
+  "id" SERIAL,
+  "first_name" VARCHAR,
+  "last_name" VARCHAR,
+  "phone_number" VARCHAR
+);
+
+CREATE TABLE "customer_emails" (
+  "customer_id" INTEGER,
+  "email_address" VARCHAR
+);
+
+
+
+
+
+
+CREATE TABLE "rooms" (
+  "id" SERIAL,
+  "floor" SMALLINT,
+  "room_no" SMALLINT,
+  "area_sqft" SMALLINT
+);
+
+
+
+
+
+CREATE TABLE "reservations" (
+  "id" SERIAL,
+  "customer_id" INTEGER,
+  "room_id" INTEGER,
+  "check_in" DATE,
+  "check_out" DATE
+
+
+
+
+  ALTER TABLE "employees"
+  ADD CONSTRAINT "valid_manager"
+  FOREIGN KEY ("manager_id") REFERENCES "employees" ("id") ON DELETE SET NULL;
+
+ALTER TABLE "employee_projects"
+  ADD CONSTRAINT "valid_employee"
+  FOREIGN KEY ("employee_id") REFERENCES "employees" ("id");
+
+ALTER TABLE "employee_projects"
+  ADD CONSTRAINT "valid_project"
+  FOREIGN KEY ("project_id") REFERENCES "projects" ("id") ON DELETE CASCADE;
+
+
+
+
+
+  ALTER TABLE "books" ADD PRIMARY KEY ("id");
+
+ALTER TABLE "books" ADD UNIQUE ("isbn");
+
+ALTER TABLE "authors" ADD PRIMARY KEY ("id");
+
+ALTER TABLE "authors" ADD UNIQUE ("email_address");
+
+ALTER TABLE "book_authors" ADD PRIMARY KEY ("book_id", "author_id");
+
+ALTER TABLE "book_authors" ADD UNIQUE ("book_id", "contribution_rank");
+);
+
+
+
+
+
+
+
+-- Primary and unique keys
+ALTER TABLE "users"
+  ADD PRIMARY KEY ("id"),
+  ADD UNIQUE ("username"),
+  ADD UNIQUE ("email");
+
+ALTER TABLE "books"
+  ADD PRIMARY KEY ("id"),
+  ADD UNIQUE ("isbn");
+
+ALTER TABLE "user_book_preferences"
+  ADD PRIMARY KEY ("user_id", "book_id");
+
+
+-- Foreign keys
+ALTER TABLE "user_book_preferences"
+  ADD FOREIGN KEY ("user_id") REFERENCES "users",
+  ADD FOREIGN KEY ("book_id") REFERENCES "books";
+
+
+-- Usernames need to have a minimum of 5 characters
+ALTER TABLE "users" ADD CHECK (LENGTH("username") >= 5);
+
+
+-- A book's name cannot be empty
+ALTER TABLE "books" ADD CHECK(LENGTH(TRIM("name")) > 0);
+
+
+-- A book's name must start with a capital letter
+ALTER TABLE "books" ADD CHECK (
+  SUBSTR("name", 1, 1) = UPPER(SUBSTR("name", 1, 1))
+);
+
+
+-- A user's book preferences have to be distinct
+ALTER TABLE "user_book_preferences" ADD UNIQUE ("user_id", "preference");
+
+
+
+
+
+
+
+CREATE TABLE "movies" (
+  "id" SERIAL PRIMARY KEY,
+  "title" VARCHAR(500), --  Night of the Day of the Dawn of the Son of the Bride of the Return of the Revenge of the Terror of the Attack of the Evil, Mutant, Hellbound, Flesh-Eating Subhumanoid Zombified Living Dead, Part 3
+  "description" TEXT
+);
+
+
+CREATE TABLE "categories" (
+  "id" SERIAL PRIMARY KEY,
+  "name" VARCHAR(50) UNIQUE
+);
+
+CREATE TABLE "movie_categories" (
+  "movie_id" INTEGER REFERENCES "movies",
+  "category_id" INTEGER REFERENCES "categories",
+  PRIMARY KEY ("movie_id", "category_id")
+);
+
+CREATE TABLE "users" (
+  "id" SERIAL PRIMARY KEY,
+  "username" VARCHAR(100),
+);
+CREATE UNIQUE INDEX ON "users" (LOWER("username"));
+
+CREATE TABLE "user_movie_ratings" (
+  "user_id" INTEGER REFERENCES "users",
+  "movie_id" INTEGER REFERENCES "movies",
+  "rating" SMALLINT CHECK ("rating" BETWEEN 0 AND 100),
+  PRIMARY KEY ("user_id", "movie_id")
+);
+CREATE INDEX ON "user_movie_ratings" ("movie_id");
+
+CREATE TABLE "user_category_likes" (
+  "user_id" INTEGER REFERENCES "users",
+  "category_id" INTEGER REFERENCES "categories",
+  PRIMARY KEY ("user_id", "category_id")
+);
+CREATE INDEX ON "user_category_likes" ("category_id");
+
+
+
+
+
+
+
+
+
+-- Update the last_name column to be capitalized
+UPDATE "people" SET "last_name" =
+  SUBSTR("last_name", 1, 1) ||
+  LOWER(SUBSTR("last_name", 2));
+
+-- Change the born_ago column to date_of_birth
+ALTER TABLE "people" ADD column "date_of_birth" DATE;
+
+UPDATE "people" SET "date_of_birth" =
+  (CURRENT_TIMESTAMP - "born_ago"::INTERVAL)::DATE;
+
+ALTER TABLE "people" DROP COLUMN "born_ago";
+
+
+
+
+INSERT INTO "people_emails"
+SELECT
+  "p"."id",
+  REGEXP_SPLIT_TO_TABLE("dn"."emails", ',')
+FROM "denormalized_people" "dn"
+JOIN "people" "p" ON (
+  "dn"."first_name" = "p"."first_name"
+  AND "dn"."last_name" = "p"."last_name"
+);

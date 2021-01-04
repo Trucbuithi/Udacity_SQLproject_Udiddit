@@ -1,0 +1,18 @@
+Key Term	Definition
+CREATE TABLE	Allows you to create tables in Postgres.
+INTEGER	A numeric data type that stores numbers without decimals.
+SERIAL	A numeric data type stored as an INTEGER, but that is incremented by one automatically by Postgres each time a new row is added.
+REAL	An inexact numeric data type, with precision to six decimal points.
+DOUBLE PRECISION	An inexact numeric data type, with precision to 15 decimal points.
+DECIMAL	An exact numeric data type that includes decimal values; also known as NUMERIC.
+CHARACTER(n)	Stores text data of length (n). Anything shorter is padded.
+VARCHAR	Stores text of varying data lengths (can be limited by an “n”).
+TEXT	Stores much longer texts of varying data lengths.
+TIMESTAMP	Stores data and time data. Use WITH/WITHOUT TIME ZONE to determine whether a time zone is associated with it (which Postgres updates to match the database’s time zone).
+DATE	Stores date data.
+TIME	Stores time data.
+JSONB	Store more complex data in key-value pairs.
+ALTER TABLE	Change table structure to add/remove columns or change the data type of a column.
+DROP	Remove a table from the database
+TRUNCATE	Remove all data in a table
+COMMENT	Add a text comment to a table or column
